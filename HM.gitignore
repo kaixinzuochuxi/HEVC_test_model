@@ -1,9 +1,11 @@
 *.exe
 
 
+bin
 bin/
 build/Debug
 build/vc2010
 build/vc2012
 build/vc2013
 build/x64
+build/.vs

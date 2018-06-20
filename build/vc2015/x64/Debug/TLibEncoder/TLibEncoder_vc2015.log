@@ -18,4 +18,4 @@
   SEIEncoder.cpp
   NALwrite.cpp
   Generating Code...
-  TLibEncoder_vc2015.vcxproj -> C:\Users\ychen455\Desktop\HM-16.18\build\\vc2015\x64\Debug\TLibEncoder\TLibEncoder.lib
+  TLibEncoder_vc2015.vcxproj -> D:\Projects\HM\build\\vc2015\x64\Debug\TLibEncoder\TLibEncoder.lib
