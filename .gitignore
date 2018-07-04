@@ -3,6 +3,7 @@
 
 bin
 bin/
+build
 build/Debug
 build/vc2010
 build/vc2012
