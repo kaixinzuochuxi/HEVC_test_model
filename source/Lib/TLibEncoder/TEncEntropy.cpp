@@ -454,6 +454,7 @@ Void TEncEntropy::encodeCrossComponentPrediction( TComTU &rTu, ComponentID compI
 }
 
 //! encode motion information for every PU block
+/////////////
 Void TEncEntropy::encodePUWise( TComDataCU* pcCU, UInt uiAbsPartIdx )
 {
 #if ENVIRONMENT_VARIABLE_DEBUG_AND_TEST

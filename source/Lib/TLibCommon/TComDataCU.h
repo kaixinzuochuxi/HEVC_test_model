@@ -113,7 +113,7 @@ private:
   // -------------------------------------------------------------------------------------------------------------------
   // neighbour access variables
   // -------------------------------------------------------------------------------------------------------------------
-
+  /// 
   TComDataCU*   m_pCtuAboveLeft;                        ///< pointer of above-left CTU.
   TComDataCU*   m_pCtuAboveRight;                       ///< pointer of above-right CTU.
   TComDataCU*   m_pCtuAbove;                            ///< pointer of above CTU.
@@ -134,10 +134,14 @@ private:
 #endif
   UChar*        m_puhIntraDir[MAX_NUM_CHANNEL_TYPE];
   UChar*        m_puhInterDir;                          ///< array of inter directions
+
+
+  ////////////////////////////
   SChar*        m_apiMVPIdx[NUM_REF_PIC_LIST_01];       ///< array of motion vector predictor candidates
   SChar*        m_apiMVPNum[NUM_REF_PIC_LIST_01];       ///< array of number of possible motion vectors predictors
   Bool*         m_pbIPCMFlag;                           ///< array of intra_pcm flags
 #if MCTS_ENC_CHECK
+  //////////////////////
   Bool          m_tMctsMvpIsValid;
 #endif
 
@@ -293,7 +297,9 @@ public:
   Void          setTransformSkipPartRange     ( UInt useTransformSkip, ComponentID compID, UInt uiAbsPartIdx, UInt uiCoveredPartIdxes );
 
   UInt          getQuadtreeTULog2MinSizeInCU  ( UInt uiIdx ) const;
-
+  /////////
+  /////////
+  //最终的两个参考向量
         TComCUMvField* getCUMvField           ( RefPicList e )                                             { return &m_acCUMvField[e];                  }
   const TComCUMvField* getCUMvField           ( RefPicList e ) const                                       { return &m_acCUMvField[e];                  }
 

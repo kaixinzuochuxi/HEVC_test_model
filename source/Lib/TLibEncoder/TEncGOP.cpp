@@ -1107,6 +1107,8 @@ Void TEncGOP::compressGOP( Int iPOCLast, Int iNumPicRcvd, TComList<TComPic*>& rc
   xInitGOP( iPOCLast, iNumPicRcvd, isField );
 
   m_iNumPicCoded = 0;
+
+  /// SEI信息
   SEIMessages leadingSeiMessages;
   SEIMessages nestedSeiMessages;
   SEIMessages duInfoSeiMessages;
@@ -1184,6 +1186,7 @@ Void TEncGOP::compressGOP( Int iPOCLast, Int iNumPicRcvd, TComList<TComPic*>& rc
 
 #endif
     //  Slice data initialization
+	// 初始化，分配，设置idx
     pcPic->clearSliceBuffer();
     pcPic->allocateNewSlice();
     m_pcSliceEncoder->setSliceIdx(0);
@@ -1568,7 +1571,7 @@ Void TEncGOP::compressGOP( Int iPOCLast, Int iNumPicRcvd, TComList<TComPic*>& rc
 
       for(UInt nextCtuTsAddr = 0; nextCtuTsAddr < numberOfCtusInFrame; )
       {
-		  //////////////////////////////////////
+		  //////////////////////////////////////预压缩与压缩
         m_pcSliceEncoder->precompressSlice( pcPic );
         m_pcSliceEncoder->compressSlice   ( pcPic, false, false );
 		////////////////////////////////////////////设置

@@ -711,6 +711,8 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
   UInt   boundingCtuTsAddr;
   TComSlice* const pcSlice            = pcPic->getSlice(getSliceIdx());
   pcSlice->setSliceSegmentBits(0);
+
+
   xDetermineStartAndBoundingCtuTsAddr ( startCtuTsAddr, boundingCtuTsAddr, pcPic );
   if (bCompressEntireSlice)
   {
@@ -722,7 +724,7 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
   m_uiPicTotalBits  = 0;
   m_dPicRdCost      = 0; // NOTE: This is a write-only variable!
   m_uiPicDist       = 0;
-
+  // 初始化熵编码
   m_pcEntropyCoder->setEntropyCoder   ( m_pppcRDSbacCoder[0][CI_CURR_BEST] );
   m_pcEntropyCoder->resetEntropy      ( pcSlice );
 
@@ -798,8 +800,10 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
 //////////////////////////////////////////////////////////////////
   for( UInt ctuTsAddr = startCtuTsAddr; ctuTsAddr < boundingCtuTsAddr; ++ctuTsAddr )
   {
+	// 地址
     const UInt ctuRsAddr = pcPic->getPicSym()->getCtuTsToRsAddrMap(ctuTsAddr);
     // initialize CTU encoder
+
     TComDataCU* pCtu = pcPic->getCtu( ctuRsAddr );
     pCtu->initCtu( pcPic, ctuRsAddr );
 
@@ -808,6 +812,7 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
     const UInt tileXPosInCtus = firstCtuRsAddrOfTile % frameWidthInCtus;
     const UInt ctuXPosInCtus  = ctuRsAddr % frameWidthInCtus;
     
+	// 第一个CTU
     if (ctuRsAddr == firstCtuRsAddrOfTile)
     {
       m_pppcRDSbacCoder[0][CI_CURR_BEST]->resetEntropy(pcSlice);
@@ -884,8 +889,9 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
 
     // run CTU trial encoder
 	///////////////////////////////////
+	//////////////////////////////////
     m_pcCuEncoder->compressCtu( pCtu );
-
+	
 
     // All CTU decisions have now been made. Restore entropy coder to an initial stage, ready to make a true encode,
     // which will result in the state of the contexts being correct. It will also count up the number of bits coded,
@@ -898,8 +904,10 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
     pRDSbacCoder->setBinsCoded( 0 );
 
     // encode CTU and calculate the true bit counters.
+	////////////////////////////////////////////////
+	////////////////////////////////////////////////
     m_pcCuEncoder->encodeCtu( pCtu );
-
+	
 
     pRDSbacCoder->setBinCountingEnableFlag( false );
 

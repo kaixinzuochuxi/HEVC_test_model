@@ -486,7 +486,7 @@ Void TAppEncTop::encode()
     fprintf(stderr, "\nfailed to open bitstream file `%s' for writing\n", m_bitstreamFileName.c_str());
     exit(EXIT_FAILURE);
   }
-
+  // pic yuv buffer,创建一次后续都用这个
   TComPicYuv*       pcPicYuvOrg = new TComPicYuv;
   TComPicYuv*       pcPicYuvRec = NULL;
 
@@ -529,7 +529,7 @@ Void TAppEncTop::encode()
     // get buffers
     xGetBuffer(pcPicYuvRec);
 
-    // read input YUV file
+    // read input YUV file :  m_cTVideoIOYuvInputFile
 #if EXTENSION_360_VIDEO
     if (ext360.isEnabled())
     {
@@ -540,6 +540,7 @@ Void TAppEncTop::encode()
       m_cTVideoIOYuvInputFile.read( pcPicYuvOrg, &cPicYuvTrueOrg, ipCSC, m_aiPad, m_InputChromaFormatIDC, m_bClipInputVideoToRec709Range );
     }
 #else
+	
     m_cTVideoIOYuvInputFile.read( pcPicYuvOrg, &cPicYuvTrueOrg, ipCSC, m_aiPad, m_InputChromaFormatIDC, m_bClipInputVideoToRec709Range );
 #endif
 

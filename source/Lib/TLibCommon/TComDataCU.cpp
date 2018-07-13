@@ -522,6 +522,7 @@ Void TComDataCU::initCtu( TComPic* pcPic, UInt ctuRsAddr )
 * \param  qp                 qp for the current CU
 * \param  bTransquantBypass  true for transquant bypass
 */
+//// 初始化各种预测数据
 Void TComDataCU::initEstData( const UInt uiDepth, const Int qp, const Bool bTransquantBypass )
 {
   m_dTotalCost         = MAX_DOUBLE;
@@ -532,6 +533,8 @@ Void TComDataCU::initEstData( const UInt uiDepth, const Int qp, const Bool bTran
   const UChar uhWidth  = getSlice()->getSPS()->getMaxCUWidth()  >> uiDepth;
   const UChar uhHeight = getSlice()->getSPS()->getMaxCUHeight() >> uiDepth;
 
+
+  //// 不同的划分次数
   for (UInt ui = 0; ui < m_uiNumPartition; ui++)
   {
     for(UInt i=0; i<NUM_REF_PIC_LIST_01; i++)
@@ -572,6 +575,7 @@ Void TComDataCU::initEstData( const UInt uiDepth, const Int qp, const Bool bTran
     }
   }
 
+  //// 清空mvfield
   for(UInt i=0; i<NUM_REF_PIC_LIST_01; i++)
   {
     m_acCUMvField[i].clearMvField();

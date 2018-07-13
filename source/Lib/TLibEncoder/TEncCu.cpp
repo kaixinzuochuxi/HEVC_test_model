@@ -250,6 +250,10 @@ Void TEncCu::compressCtu( TComDataCU* pCtu )
   }
 #endif
 }
+
+
+
+
 /** \param  pCtu  pointer of CU data class
  */
 Void TEncCu::encodeCtu ( TComDataCU* pCtu )
@@ -267,6 +271,10 @@ Void TEncCu::encodeCtu ( TComDataCU* pCtu )
   // Encode CU data
   xEncodeCU( pCtu, 0, 0 );
 }
+
+
+
+
 
 // ====================================================================================================================
 // Protected member functions
@@ -431,6 +439,9 @@ Void TEncCu::deriveTestModeAMP (TComDataCU *pcBestCU, PartSize eParentPartSize, 
 /** Compress a CU block recursively with enabling sub-CTU-level delta QP
  *  - for loop of QP value to compress the current CU with all possible QP
 */
+
+
+
 #if AMP_ENC_SPEEDUP
 Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const UInt uiDepth DEBUG_STRING_FN_DECLARE(sDebug_), PartSize eParentPartSize )
 #else
@@ -439,6 +450,8 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
 {
   TComPic* pcPic = rpcBestCU->getPic();
   DEBUG_STRING_NEW(sDebug)
+
+  // 参数集
   const TComPPS &pps=*(rpcTempCU->getSlice()->getPPS());
   const TComSPS &sps=*(rpcTempCU->getSlice()->getSPS());
   
@@ -459,7 +472,7 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
   const UInt uiBPelY   = uiTPelY + rpcBestCU->getHeight(0) - 1;
   const UInt uiWidth   = rpcBestCU->getWidth(0);
 
-  ////////////////////QP范围
+  ////////////////////QP范围，基本，最小，最大
   Int iBaseQP = xComputeQP( rpcBestCU, uiDepth );
   Int iMinQP;
   Int iMaxQP;
@@ -467,6 +480,7 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
 
   const UInt numberValidComponents = rpcBestCU->getPic()->getNumberValidComponents();
 
+  /// 决定最小最大QP
   if( uiDepth <= pps.getMaxCuDQPDepth() )
   {
     Int idQP = m_pcEncCfg->getMaxDeltaQP();
@@ -480,7 +494,7 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
   }
 
 
-
+  ///// lumaQP OFFSET,修改最小最大QP
   if ( m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled() )
   {
     if ( uiDepth <= pps.getMaxCuDQPDepth() )
@@ -502,8 +516,10 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
 
   // transquant-bypass (TQB) processing loop variable initialisation ---
 
-  const Int lowestQP = iMinQP; // For TQB, use this QP which is the lowest non TQB QP tested (rather than QP'=0) - that way delta QPs are smaller, and TQB can be tested at all CU levels.
 
+// For TQB, use this QP which is the lowest non TQB QP tested (rather than QP'=0) - that way delta QPs are smaller, and TQB can be tested at all CU levels.
+
+  const Int lowestQP = iMinQP; 
   if ( (pps.getTransquantBypassEnabledFlag()) )
   {
     isAddLowestQP = true; // mark that the first iteration is to cost TQB mode.
@@ -514,14 +530,18 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
     }
   }
 
+
+
   TComSlice * pcSlice = rpcTempCU->getPic()->getSlice(rpcTempCU->getPic()->getCurrSliceIdx());
-  ////////是否到达边界F未到T到达
+  ////////是否到达边界，F未到T到达
   const Bool bBoundary = !( uiRPelX < sps.getPicWidthInLumaSamples() && uiBPelY < sps.getPicHeightInLumaSamples() );
-  /////////到达边界
+  /////////未到达边界
   if ( !bBoundary )
   {
+	// QP 迭代
     for (Int iQP=iMinQP; iQP<=iMaxQP; iQP++)
     {
+	  //// 是否无损
       const Bool bIsLosslessMode = isAddLowestQP && (iQP == iMinQP);
 
       if (bIsLosslessMode)
@@ -534,6 +554,8 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
       }
 
       m_cuChromaQpOffsetIdxPlus1 = 0;
+
+	  /// 色度补偿
       if (pcSlice->getUseChromaQpAdj())
       {
         /* Pre-estimation of chroma QP based on input block activity may be performed
@@ -549,6 +571,8 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
       rpcTempCU->initEstData( uiDepth, iQP, bIsLosslessMode );
 
       // do inter modes, SKIP and 2Nx2N
+	  // 不为I帧
+	  // 是否提前终止
       if( rpcBestCU->getSlice()->getSliceType() != I_SLICE )
       {
         // 2Nx2N
@@ -560,7 +584,7 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
         // SKIP
         xCheckRDCostMerge2Nx2N( rpcBestCU, rpcTempCU DEBUG_STRING_PASS_INTO(sDebug), &earlyDetectionSkipMode );//by Merge for inter_2Nx2N
         rpcTempCU->initEstData( uiDepth, iQP, bIsLosslessMode );
-
+		// 非2Nx2N和SKIP
         if(!m_pcEncCfg->getUseEarlySkipDetection())
         {
           // 2Nx2N, NxN
@@ -579,6 +603,7 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
       }
     }
 
+	// 非提前结束
     if(!earlyDetectionSkipMode)
     {
       for (Int iQP=iMinQP; iQP<=iMaxQP; iQP++)
@@ -592,7 +617,7 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
 
         rpcTempCU->initEstData( uiDepth, iQP, bIsLosslessMode );
 
-        // do inter modes, NxN, 2NxN, and Nx2N
+        // do inter modes, NxN, 2NxN, and Nx2N，尝试不同模式
         if( rpcBestCU->getSlice()->getSliceType() != I_SLICE )
         {
           // 2Nx2N, NxN
@@ -810,6 +835,8 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
     xFillPCMBuffer(rpcBestCU, m_ppcOrigYuv[uiDepth]);
   }
 
+
+  // 根据uiDepth调整QP minmax
   if( uiDepth == pps.getMaxCuDQPDepth() )
   {
     Int idQP = m_pcEncCfg->getMaxDeltaQP();
@@ -851,7 +878,7 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
   {
     // further split
     Double splitTotalCost = 0;
-
+	/// 包含继续划分
     for (Int iQP=iMinQP; iQP<=iMaxQP; iQP++)
     {
       const Bool bIsLosslessMode = false; // False at this level. Next level down may set it to true.
@@ -989,6 +1016,13 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
         }
       }
 
+
+
+
+
+
+
+	  ////////////////////////////////////////////////
       xCheckBestMode( rpcBestCU, rpcTempCU, uiDepth DEBUG_STRING_PASS_INTO(sDebug) DEBUG_STRING_PASS_INTO(sTempDebug) DEBUG_STRING_PASS_INTO(false) ); // RD compare current larger prediction
                                                                                                                                                        // with sub partitioned prediction.
     }
@@ -1010,6 +1044,8 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
   assert( rpcBestCU->getPredictionMode( 0 ) != NUMBER_OF_PREDICTION_MODES );
   assert( rpcBestCU->getTotalCost     (   ) != MAX_DOUBLE                 );
 }
+
+
 
 /** finish encoding a cu and handle end-of-slice conditions
  * \param pcCU
@@ -1066,12 +1102,20 @@ Int TEncCu::xComputeQP( TComDataCU* pcCU, UInt uiDepth )
   return Clip3(-pcCU->getSlice()->getSPS()->getQpBDOffset(CHANNEL_TYPE_LUMA), MAX_QP, iBaseQp+iQpOffset );
 }
 
+
+
+
+
+
 /** encode a CU block recursively
  * \param pcCU
  * \param uiAbsPartIdx
  * \param uiDepth
  * \returns Void
  */
+
+
+
 Void TEncCu::xEncodeCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
 {
         TComPic   *const pcPic   = pcCU->getPic();
@@ -1082,12 +1126,15 @@ Void TEncCu::xEncodeCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
   const UInt maxCUWidth  = sps.getMaxCUWidth();
   const UInt maxCUHeight = sps.getMaxCUHeight();
 
+  //// CU 位置
         Bool bBoundary = false;
         UInt uiLPelX   = pcCU->getCUPelX() + g_auiRasterToPelX[ g_auiZscanToRaster[uiAbsPartIdx] ];
   const UInt uiRPelX   = uiLPelX + (maxCUWidth>>uiDepth)  - 1;
         UInt uiTPelY   = pcCU->getCUPelY() + g_auiRasterToPelY[ g_auiZscanToRaster[uiAbsPartIdx] ];
   const UInt uiBPelY   = uiTPelY + (maxCUHeight>>uiDepth) - 1;
 
+
+  /// 判断边界与非边界
   if( ( uiRPelX < sps.getPicWidthInLumaSamples() ) && ( uiBPelY < sps.getPicHeightInLumaSamples() ) )
   {
     m_pcEntropyCoder->encodeSplitFlag( pcCU, uiAbsPartIdx, uiDepth );
@@ -1109,6 +1156,8 @@ Void TEncCu::xEncodeCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
     {
       setCodeChromaQpAdjFlag(true);
     }
+
+
 	////////////////反复调用
     for ( UInt uiPartUnitIdx = 0; uiPartUnitIdx < 4; uiPartUnitIdx++, uiAbsPartIdx+=uiQNumParts )
     {
@@ -1165,6 +1214,7 @@ Void TEncCu::xEncodeCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
   }
 
   // prediction Info ( Intra : direction mode, Inter : Mv, reference idx )
+  ///////////////////////////////
   ///////////////////////////////
   m_pcEntropyCoder->encodePredInfo( pcCU, uiAbsPartIdx );
 
@@ -1444,7 +1494,7 @@ Void TEncCu::xCheckRDCostMerge2Nx2N( TComDataCU*& rpcBestCU, TComDataCU*& rpcTem
   DEBUG_STRING_APPEND(sDebug, bestStr)
 }
 
-
+/////////////////////////////
 #if AMP_MRG
 Void TEncCu::xCheckRDCostInter( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, PartSize ePartSize DEBUG_STRING_FN_DECLARE(sDebug), Bool bUseMRG)
 #else
@@ -1473,6 +1523,7 @@ Void TEncCu::xCheckRDCostInter( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, 
 #if MCTS_ENC_CHECK
   rpcTempCU->setTMctsMvpIsValid(true);
 #endif
+//////// 搜索！！！
 
 #if AMP_MRG
   rpcTempCU->setMergeAMP (true);
@@ -1494,7 +1545,7 @@ Void TEncCu::xCheckRDCostInter( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, 
     return;
   }
 #endif
-
+  //////// 搜索后的编码
   m_pcPredSearch->encodeResAndCalcRdInterCU( rpcTempCU, m_ppcOrigYuv[uhDepth], m_ppcPredYuvTemp[uhDepth], m_ppcResiYuvTemp[uhDepth], m_ppcResiYuvBest[uhDepth], m_ppcRecoYuvTemp[uhDepth], false DEBUG_STRING_PASS_INTO(sTest) );
   rpcTempCU->getTotalCost()  = m_pcRdCost->calcRdCost( rpcTempCU->getTotalBits(), rpcTempCU->getTotalDistortion() );
 
@@ -1502,6 +1553,7 @@ Void TEncCu::xCheckRDCostInter( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, 
   DebugInterPredResiReco(sTest, *(m_ppcPredYuvTemp[uhDepth]), *(m_ppcResiYuvBest[uhDepth]), *(m_ppcRecoYuvTemp[uhDepth]), DebugStringGetPredModeMask(rpcTempCU->getPredictionMode(0)));
 #endif
 
+  //////// check！
   xCheckDQP( rpcTempCU );
   xCheckBestMode(rpcBestCU, rpcTempCU, uhDepth DEBUG_STRING_PASS_INTO(sDebug) DEBUG_STRING_PASS_INTO(sTest));
 }
@@ -1530,7 +1582,7 @@ Void TEncCu::xCheckRDCostIntra( TComDataCU *&rpcBestCU,
   rpcTempCU->setPartSizeSubParts( eSize, 0, uiDepth );
   rpcTempCU->setPredModeSubParts( MODE_INTRA, 0, uiDepth );
   rpcTempCU->setChromaQpAdjSubParts( rpcTempCU->getCUTransquantBypass(0) ? 0 : m_cuChromaQpOffsetIdxPlus1, 0, uiDepth );
-
+  /// 残差
   Pel resiLuma[NUMBER_OF_STORED_RESIDUAL_TYPES][MAX_CU_SIZE * MAX_CU_SIZE];
 
   m_pcPredSearch->estIntraPredLumaQT( rpcTempCU, m_ppcOrigYuv[uiDepth], m_ppcPredYuvTemp[uiDepth], m_ppcResiYuvTemp[uiDepth], m_ppcRecoYuvTemp[uiDepth], resiLuma DEBUG_STRING_PASS_INTO(sTest) );
