@@ -6,7 +6,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>-c D:\Projects\HM_test\encoder_lowdelay_main.cfg -c D:\Projects\HM_test\BasketballPass.cfg  &gt; out.txt</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-c D:\Projects\HM_test\encoder_lowdelay_main.cfg -c D:\Projects\HM_test\BasketballPass.cfg </LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>D:\Projects\HM_test</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>

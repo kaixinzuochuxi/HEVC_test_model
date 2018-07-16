@@ -1397,7 +1397,7 @@ Void TEncGOP::compressGOP( Int iPOCLast, Int iNumPicRcvd, TComList<TComPic*>& rc
     pcSlice->setRefPOCList();
 
     pcSlice->setList1IdxToList0Idx();
-
+	////////// MVµÄÉèÖÃ
     if (m_pcEncTop->getTMVPModeId() == 2)
     {
       if (iGOPid == 0) // first picture in SOP (i.e. forward B)

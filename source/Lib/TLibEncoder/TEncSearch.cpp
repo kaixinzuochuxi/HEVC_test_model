@@ -2956,6 +2956,7 @@ Void TEncSearch::predInterSearch( TComDataCU* pcCU, TComYuv* pcOrgYuv, TComYuv* 
 Void TEncSearch::predInterSearch( TComDataCU* pcCU, TComYuv* pcOrgYuv, TComYuv* pcPredYuv, TComYuv* pcResiYuv, TComYuv* pcRecoYuv, Bool bUseRes )
 #endif
 {
+  // 清空内存
   for(UInt i=0; i<NUM_REF_PIC_LIST_01; i++)
   {
     m_acYuvPred[i].clear();
@@ -2970,6 +2971,7 @@ Void TEncSearch::predInterSearch( TComDataCU* pcCU, TComYuv* pcOrgYuv, TComYuv* 
 
   pcRecoYuv->clear();
 
+  ///// 初始化变量
   TComMv       cMvSrchRngLT;
   TComMv       cMvSrchRngRB;
 
@@ -2981,6 +2983,7 @@ Void TEncSearch::predInterSearch( TComDataCU* pcCU, TComYuv* pcOrgYuv, TComYuv* 
   TComMv       cMvTemp[2][33];
 
   Int          iNumPart    = pcCU->getNumPartitions();
+  ////// 预测方向，帧的类型IPB，非P即B，P1B2
   Int          iNumPredDir = pcCU->getSlice()->isInterP() ? 1 : 2;
 
   TComMv       cMvPred[2][33];
@@ -3055,6 +3058,7 @@ Void TEncSearch::predInterSearch( TComDataCU* pcCU, TComYuv* pcOrgYuv, TComYuv* 
     //  Uni-directional prediction
     for ( Int iRefList = 0; iRefList < iNumPredDir; iRefList++ )
     {
+	  //// 
       RefPicList  eRefPicList = ( iRefList ? REF_PIC_LIST_1 : REF_PIC_LIST_0 );
 
       for ( Int iRefIdxTemp = 0; iRefIdxTemp < pcCU->getSlice()->getNumRefIdx(eRefPicList); iRefIdxTemp++ )

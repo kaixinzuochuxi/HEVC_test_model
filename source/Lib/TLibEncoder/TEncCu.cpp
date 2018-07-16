@@ -231,12 +231,16 @@ Void TEncCu::init( TEncTop* pcEncTop )
 Void TEncCu::compressCtu( TComDataCU* pCtu )
 {
   // initialize CU data
+  //将最优CU置为当前CTU，二维指针
   m_ppcBestCU[0]->initCtu( pCtu->getPic(), pCtu->getCtuRsAddr() );
+  //将当前CU置为当前CTU
   m_ppcTempCU[0]->initCtu( pCtu->getPic(), pCtu->getCtuRsAddr() );
 
   // analysis of CU
   DEBUG_STRING_NEW(sDebug)
+  
 
+  //递归进行块划分
   xCompressCU( m_ppcBestCU[0], m_ppcTempCU[0], 0 DEBUG_STRING_PASS_INTO(sDebug) );
   DEBUG_STRING_OUTPUT(std::cout, sDebug)
 
@@ -258,11 +262,12 @@ Void TEncCu::compressCtu( TComDataCU* pCtu )
  */
 Void TEncCu::encodeCtu ( TComDataCU* pCtu )
 {
+	//当开启DQP时，置flag
   if ( pCtu->getSlice()->getPPS()->getUseDQP() )
   {
     setdQPFlag(true);
   }
-
+  //当开启色度QP自适应时，置flag
   if ( pCtu->getSlice()->getUseChromaQpAdj() )
   {
     setCodeChromaQpAdjFlag(true);
@@ -436,9 +441,19 @@ Void TEncCu::deriveTestModeAMP (TComDataCU *pcBestCU, PartSize eParentPartSize, 
 // ====================================================================================================================
 // Protected member functions
 // ====================================================================================================================
+
+
+
+
 /** Compress a CU block recursively with enabling sub-CTU-level delta QP
  *  - for loop of QP value to compress the current CU with all possible QP
-*/
+ 完成块的划分，确定最优预测模式，分为
+ 1. 帧间预测xCheckRDCostInter、xCheckRDCostMerge2Nx2N
+ 2. 帧内预测xCheckRDCostIntra
+ 3. PCM模式xCheckIntraPCM
+ PCM模式是一种无损编码模式，该模式下编码器不进行预测和变换操作，直接传输CU的像素值，因此其失真为0，HM中默认是关闭的。
+ 
+ */
 
 
 
@@ -533,7 +548,7 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
 
 
   TComSlice * pcSlice = rpcTempCU->getPic()->getSlice(rpcTempCU->getPic()->getCurrSliceIdx());
-  ////////是否到达边界，F未到T到达
+  ////////是否处于边界，F未到T到达
   const Bool bBoundary = !( uiRPelX < sps.getPicWidthInLumaSamples() && uiBPelY < sps.getPicHeightInLumaSamples() );
   /////////未到达边界
   if ( !bBoundary )
@@ -568,6 +583,7 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
         m_cuChromaQpOffsetIdxPlus1 = ((uiLPelX >> lgMinCuSize) + (uiTPelY >> lgMinCuSize)) % (pps.getPpsRangeExtension().getChromaQpOffsetListLen() + 1);
       }
 
+	  //当前CU初始化
       rpcTempCU->initEstData( uiDepth, iQP, bIsLosslessMode );
 
       // do inter modes, SKIP and 2Nx2N
@@ -575,7 +591,7 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
 	  // 是否提前终止
       if( rpcBestCU->getSlice()->getSliceType() != I_SLICE )
       {
-        // 2Nx2N
+        // 2Nx2N，使用earlyDetectionSkipMode
         if(m_pcEncCfg->getUseEarlySkipDetection())
         {
           xCheckRDCostInter( rpcBestCU, rpcTempCU, SIZE_2Nx2N DEBUG_STRING_PASS_INTO(sDebug) );
@@ -584,12 +600,13 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
         // SKIP
         xCheckRDCostMerge2Nx2N( rpcBestCU, rpcTempCU DEBUG_STRING_PASS_INTO(sDebug), &earlyDetectionSkipMode );//by Merge for inter_2Nx2N
         rpcTempCU->initEstData( uiDepth, iQP, bIsLosslessMode );
-		// 非2Nx2N和SKIP
+		// 非2Nx2N和SKIP，不使用earlyDetectionSkipMode
         if(!m_pcEncCfg->getUseEarlySkipDetection())
         {
           // 2Nx2N, NxN
           xCheckRDCostInter( rpcBestCU, rpcTempCU, SIZE_2Nx2N DEBUG_STRING_PASS_INTO(sDebug) );
           rpcTempCU->initEstData( uiDepth, iQP, bIsLosslessMode );
+		  //// 快速模式
           if(m_pcEncCfg->getUseCbfFastMode())
           {
             doNotBlockPu = rpcBestCU->getQtRootCbf( 0 ) != 0;
@@ -603,9 +620,10 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
       }
     }
 
-	// 非提前结束
+	// 非提前结束，inter，intra
     if(!earlyDetectionSkipMode)
     {
+	  
       for (Int iQP=iMinQP; iQP<=iMaxQP; iQP++)
       {
         const Bool bIsLosslessMode = isAddLowestQP && (iQP == iMinQP); // If lossless, then iQP is irrelevant for subsequent modules.
@@ -618,14 +636,16 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
         rpcTempCU->initEstData( uiDepth, iQP, bIsLosslessMode );
 
         // do inter modes, NxN, 2NxN, and Nx2N，尝试不同模式
+		//// inter
         if( rpcBestCU->getSlice()->getSliceType() != I_SLICE )
         {
           // 2Nx2N, NxN
-
+		  // 不为8*8
           if(!( (rpcBestCU->getWidth(0)==8) && (rpcBestCU->getHeight(0)==8) ))
           {
             if( uiDepth == sps.getLog2DiffMaxMinCodingBlockSize() && doNotBlockPu)
             {
+			  // SIZE_NxN代价，比较
               xCheckRDCostInter( rpcBestCU, rpcTempCU, SIZE_NxN DEBUG_STRING_PASS_INTO(sDebug)   );
               rpcTempCU->initEstData( uiDepth, iQP, bIsLosslessMode );
             }
@@ -763,6 +783,10 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
           }
         }
 
+
+
+
+		// 以下为帧内模式选择
         // do normal intra modes
         // speedup for inter frames
 #if MCTS_ENC_CHECK
@@ -815,6 +839,9 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
       }
     }
 
+
+
+	///// cost没到最大值
     if( rpcBestCU->getTotalCost()!=MAX_DOUBLE )
     {
       m_pcRDGoOnSbacCoder->load(m_pppcRDSbacCoder[uiDepth][CI_NEXT_BEST]);
@@ -1112,17 +1139,32 @@ Int TEncCu::xComputeQP( TComDataCU* pcCU, UInt uiDepth )
  * \param uiAbsPartIdx
  * \param uiDepth
  * \returns Void
+
+ 在最优划分已经完成后，对每块进行编码时使用
+ 调用函数：
+ encodeSplitFlag编码块是否划分
+ encodeSkipFlag编码是否是skip模式
+ encodeMergeIndex如果是skip模式，编码merge索引
+ encodePredMode编码CU的模式，是intra还是inter
+ encodePartSize编码CU中的PU的类型
+ encodeIPCMInfo 如果选用了PCM模式会编码PCM模式的信息
+ encodePredInfo编码预测的信息，如果是帧内，编码预测方向，如果是帧间，编码MV和参考索引
+ encodeCoeff编码残差系数
+ encodeCoeff中会编码TU的分割标志位，cbf和残差系数的信息
+
  */
 
 
 
 Void TEncCu::xEncodeCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
 {
+	// 当前图像，当前slice，SPS,PPS
         TComPic   *const pcPic   = pcCU->getPic();
         TComSlice *const pcSlice = pcCU->getSlice();
   const TComSPS   &sps =*(pcSlice->getSPS());
   const TComPPS   &pps =*(pcSlice->getPPS());
 
+  // 最大CU宽度与高度
   const UInt maxCUWidth  = sps.getMaxCUWidth();
   const UInt maxCUHeight = sps.getMaxCUHeight();
 
@@ -1198,6 +1240,8 @@ Void TEncCu::xEncodeCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
     return;
   }
 
+
+  // 预测模式与PU类型
   m_pcEntropyCoder->encodePredMode( pcCU, uiAbsPartIdx );
   m_pcEntropyCoder->encodePartSize( pcCU, uiAbsPartIdx, uiDepth );
 
@@ -1502,7 +1546,7 @@ Void TEncCu::xCheckRDCostInter( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, 
 #endif
 {
   DEBUG_STRING_NEW(sTest)
-
+  // 快速DQP
   if(getFastDeltaQp())
   {
     const TComSPS &sps=*(rpcTempCU->getSlice()->getSPS());
@@ -1516,6 +1560,8 @@ Void TEncCu::xCheckRDCostInter( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, 
   // prior to this, rpcTempCU will have just been reset using rpcTempCU->initEstData( uiDepth, iQP, bIsLosslessMode );
   UChar uhDepth = rpcTempCU->getDepth( 0 );
 
+
+  // 设置，划分大小？模式，色度补偿
   rpcTempCU->setPartSizeSubParts  ( ePartSize,  0, uhDepth );
   rpcTempCU->setPredModeSubParts  ( MODE_INTER, 0, uhDepth );
   rpcTempCU->setChromaQpAdjSubParts( rpcTempCU->getCUTransquantBypass(0) ? 0 : m_cuChromaQpOffsetIdxPlus1, 0, uhDepth );
@@ -1523,10 +1569,14 @@ Void TEncCu::xCheckRDCostInter( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, 
 #if MCTS_ENC_CHECK
   rpcTempCU->setTMctsMvpIsValid(true);
 #endif
-//////// 搜索！！！
+
+  
+  
+  //////// 搜索！！！
 
 #if AMP_MRG
   rpcTempCU->setMergeAMP (true);
+  ////////////////////////////////////////
   m_pcPredSearch->predInterSearch ( rpcTempCU, m_ppcOrigYuv[uhDepth], m_ppcPredYuvTemp[uhDepth], m_ppcResiYuvTemp[uhDepth], m_ppcRecoYuvTemp[uhDepth] DEBUG_STRING_PASS_INTO(sTest), false, bUseMRG );
 #else
   m_pcPredSearch->predInterSearch ( rpcTempCU, m_ppcOrigYuv[uhDepth], m_ppcPredYuvTemp[uhDepth], m_ppcResiYuvTemp[uhDepth], m_ppcRecoYuvTemp[uhDepth] );
@@ -1545,6 +1595,9 @@ Void TEncCu::xCheckRDCostInter( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, 
     return;
   }
 #endif
+
+
+
   //////// 搜索后的编码
   m_pcPredSearch->encodeResAndCalcRdInterCU( rpcTempCU, m_ppcOrigYuv[uhDepth], m_ppcPredYuvTemp[uhDepth], m_ppcResiYuvTemp[uhDepth], m_ppcResiYuvBest[uhDepth], m_ppcRecoYuvTemp[uhDepth], false DEBUG_STRING_PASS_INTO(sTest) );
   rpcTempCU->getTotalCost()  = m_pcRdCost->calcRdCost( rpcTempCU->getTotalBits(), rpcTempCU->getTotalDistortion() );
@@ -1689,12 +1742,14 @@ Void TEncCu::xCheckIntraPCM( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU )
  * \param rpcTempCU
  * \param uiDepth
  */
+
 Void TEncCu::xCheckBestMode( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt uiDepth DEBUG_STRING_FN_DECLARE(sParent) DEBUG_STRING_FN_DECLARE(sTest) DEBUG_STRING_PASS_INTO(Bool bAddSizeInfo) )
 {
+	// 检查cost，当前是否比历史最优要好
   if( rpcTempCU->getTotalCost() < rpcBestCU->getTotalCost() )
   {
     TComYuv* pcYuv;
-    // Change Information data
+    // Change Information data，交换当前与最佳
     TComDataCU* pcCU = rpcBestCU;
     rpcBestCU = rpcTempCU;
     rpcTempCU = pcCU;

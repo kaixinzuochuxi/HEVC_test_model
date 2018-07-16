@@ -127,7 +127,7 @@ public:
   // ------------------------------------------------------------------------------------------------------------------
   // get
   // ------------------------------------------------------------------------------------------------------------------
-
+  ///////////////////// iIdx ≤√¥“‚Àº
   TComMv const & getMv    ( Int iIdx ) const { return  m_pcMv    [iIdx]; }
   TComMv const & getMvd   ( Int iIdx ) const { return  m_pcMvd   [iIdx]; }
   Int            getRefIdx( Int iIdx ) const { return  m_piRefIdx[iIdx]; }

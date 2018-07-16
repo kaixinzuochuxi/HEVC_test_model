@@ -700,6 +700,7 @@ Void TEncSlice::calCostSliceI(TComPic* pcPic) // TODO: this only analyses the fi
 
 /** \param pcPic   picture class
  */
+// 后面两个参数默认关闭
 Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, const Bool bFastDeltaQP )
 {
   // if bCompressEntireSlice is true, then the entire slice (not slice segment) is compressed,
@@ -709,11 +710,13 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
   ////Ts是什么?
   UInt   startCtuTsAddr;
   UInt   boundingCtuTsAddr;
+  // 当前slice
   TComSlice* const pcSlice            = pcPic->getSlice(getSliceIdx());
   pcSlice->setSliceSegmentBits(0);
 
-
+  //计算当前Slice中的起始CTU和边界CTU
   xDetermineStartAndBoundingCtuTsAddr ( startCtuTsAddr, boundingCtuTsAddr, pcPic );
+  //bCompressEntireSlice默认为false
   if (bCompressEntireSlice)
   {
     boundingCtuTsAddr = pcSlice->getSliceCurEndCtuTsAddr();
@@ -726,15 +729,18 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
   m_uiPicDist       = 0;
   // 初始化熵编码
   m_pcEntropyCoder->setEntropyCoder   ( m_pppcRDSbacCoder[0][CI_CURR_BEST] );
+  //根据当前Slice设置熵编码参数
   m_pcEntropyCoder->resetEntropy      ( pcSlice );
 
   TEncBinCABAC* pRDSbacCoder = (TEncBinCABAC *) m_pppcRDSbacCoder[0][CI_CURR_BEST]->getEncBinIf();
   pRDSbacCoder->setBinCountingEnableFlag( false );
   pRDSbacCoder->setBinsCoded( 0 );
-
+  //bit计数
   TComBitCounter  tempBitCounter;
+  //帧每行的CTU个数
   const UInt      frameWidthInCtus = pcPic->getPicSym()->getFrameWidthInCtus();
   
+  //快速DeltaQp默认关闭
   m_pcCuEncoder->setFastDeltaQp(bFastDeltaQP);
 
   //------------------------------------------------------------------------------
@@ -783,8 +789,10 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
   // Adjust initial state if this is the start of a dependent slice.
   {
     const UInt      ctuRsAddr               = pcPic->getPicSym()->getCtuTsToRsAddrMap( startCtuTsAddr);
+	/// 当前tile序号，内容
     const UInt      currentTileIdx          = pcPic->getPicSym()->getTileIdxMap(ctuRsAddr);
     const TComTile *pCurrentTile            = pcPic->getPicSym()->getTComTile(currentTileIdx);
+	///  第一个地址
     const UInt      firstCtuRsAddrOfTile    = pCurrentTile->getFirstCtuRsAddr();
     if( pcSlice->getDependentSliceSegmentFlag() && ctuRsAddr != firstCtuRsAddrOfTile )
     {
@@ -809,12 +817,15 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
 
     // update CABAC state
     const UInt firstCtuRsAddrOfTile = pcPic->getPicSym()->getTComTile(pcPic->getPicSym()->getTileIdxMap(ctuRsAddr))->getFirstCtuRsAddr();
-    const UInt tileXPosInCtus = firstCtuRsAddrOfTile % frameWidthInCtus;
-    const UInt ctuXPosInCtus  = ctuRsAddr % frameWidthInCtus;
+    // tile x 坐标
+	const UInt tileXPosInCtus = firstCtuRsAddrOfTile % frameWidthInCtus;
+    // CTU x坐标
+	const UInt ctuXPosInCtus  = ctuRsAddr % frameWidthInCtus;
     
 	// 第一个CTU
     if (ctuRsAddr == firstCtuRsAddrOfTile)
     {
+		//设置熵编码参数
       m_pppcRDSbacCoder[0][CI_CURR_BEST]->resetEntropy(pcSlice);
     }
     else if ( ctuXPosInCtus == tileXPosInCtus && m_pcCfg->getEntropyCodingSyncEnabledFlag())
@@ -844,6 +855,8 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
     ((TEncBinCABAC*)m_pcRDGoOnSbacCoder->getEncBinIf())->setBinCountingEnableFlag(true);
 
     Double oldLambda = m_pcRdCost->getLambda();
+
+	////////// RC
     if ( m_pcCfg->getUseRateCtrl() )
     {
       Int estQP        = pcSlice->getSliceQp();
@@ -890,6 +903,7 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
     // run CTU trial encoder
 	///////////////////////////////////
 	//////////////////////////////////
+	//CU划分
     m_pcCuEncoder->compressCtu( pCtu );
 	
 
@@ -897,6 +911,7 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
     // which will result in the state of the contexts being correct. It will also count up the number of bits coded,
     // which is used if there is a limit of the number of bytes per slice-segment.
 
+	//设置熵编码器参数
     m_pcEntropyCoder->setEntropyCoder ( m_pppcRDSbacCoder[0][CI_CURR_BEST] );
     m_pcEntropyCoder->setBitstream( &tempBitCounter );
     pRDSbacCoder->setBinCountingEnableFlag( true );
@@ -906,8 +921,17 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
     // encode CTU and calculate the true bit counters.
 	////////////////////////////////////////////////
 	////////////////////////////////////////////////
+
     m_pcCuEncoder->encodeCtu( pCtu );
+	Int partnum = pCtu->getNumPartitions();
+
+
+
+	TComMv HorMV = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(0);
+	TComMv VerMV = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(0);
 	
+	Int CUX = pCtu->getCUPelX();
+	Int CUY = pCtu->getCUPelY();
 
     pRDSbacCoder->setBinCountingEnableFlag( false );
 
@@ -929,6 +953,7 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
       boundingCtuTsAddr=validEndOfSliceCtuTsAddr;
     }
 
+	//如果当前CTU超过了边界CTU，跳出
     if (boundingCtuTsAddr <= ctuTsAddr)
     {
       break;
@@ -943,7 +968,7 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
       m_entropyCodingSyncContextState.loadContexts(m_pppcRDSbacCoder[0][CI_CURR_BEST]);
     }
 
-
+	////////// RC
     if ( m_pcCfg->getUseRateCtrl() )
     {
       Int actualQP        = g_RCInvalidQPValue;
@@ -972,8 +997,11 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
                                                 pCtu->getSlice()->getSliceType() == I_SLICE ? 0 : m_pcCfg->getLCULevelRC() );
     }
 
+
+	//计算总的bit、RD cost、失真
     m_uiPicTotalBits += pCtu->getTotalBits();
     m_dPicRdCost     += pCtu->getTotalCost();
+	//////////
     m_uiPicDist      += pCtu->getTotalDistortion();
   }
 
