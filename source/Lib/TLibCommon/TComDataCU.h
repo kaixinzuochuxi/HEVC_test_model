@@ -80,6 +80,8 @@ private:
   UInt          m_absZIdxInCtu;                         ///< absolute address in a CTU. It's Z scan order
   UInt          m_uiCUPelX;                             ///< CU position in a pixel (X)
   UInt          m_uiCUPelY;                             ///< CU position in a pixel (Y)
+  
+  //////////array，如何实现？不同层？
   UInt          m_uiNumPartition;                       ///< total number of minimum partitions in a CU
   UChar*        m_puhWidth;                             ///< array of widths
   UChar*        m_puhHeight;                            ///< array of heights

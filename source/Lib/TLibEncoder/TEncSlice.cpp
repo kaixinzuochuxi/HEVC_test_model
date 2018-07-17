@@ -929,7 +929,7 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
 
 	TComMv HorMV = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(0);
 	TComMv VerMV = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(0);
-	
+	UInt num_idx = pCtu->getZorderIdxInCtu();
 	Int CUX = pCtu->getCUPelX();
 	Int CUY = pCtu->getCUPelY();
 
