@@ -903,7 +903,7 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
     // run CTU trial encoder
 	///////////////////////////////////
 	//////////////////////////////////
-	//CU划分
+	//CU划分,pCtu的作用：CTU的起始地址
     m_pcCuEncoder->compressCtu( pCtu );
 	
 
@@ -926,9 +926,12 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
 	Int partnum = pCtu->getNumPartitions();
 
 
+	//if(pCtu->getCtuRsAddr()==):
+	//TComMv HorMV0 = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(0);
+	//TComMv HorMV1 = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(1);
+	//TComMv HorMV2 = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(2);
+	//TComMv HorMV3 = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(3);
 
-	TComMv HorMV = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(0);
-	TComMv VerMV = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(0);
 	UInt num_idx = pCtu->getZorderIdxInCtu();
 	Int CUX = pCtu->getCUPelX();
 	Int CUY = pCtu->getCUPelY();

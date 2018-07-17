@@ -44,6 +44,7 @@
 #include "CommonDef.h"
 #include "TComSlice.h"
 #include "TComDataCU.h"
+
 class TComSampleAdaptiveOffset;
 class TComPPS;
 
