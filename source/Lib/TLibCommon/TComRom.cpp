@@ -280,7 +280,9 @@ Void destroyROM()
 // ====================================================================================================================
 // Data structure related table & variable
 // ====================================================================================================================
-
+/////////快速访问坐标，以最小PU为单位
+///////// ZScan与Raster的相互转换
+///////// Raster到XY
 UInt g_auiZscanToRaster [ MAX_NUM_PART_IDXS_IN_CTU_WIDTH*MAX_NUM_PART_IDXS_IN_CTU_WIDTH ] = { 0, };
 UInt g_auiRasterToZscan [ MAX_NUM_PART_IDXS_IN_CTU_WIDTH*MAX_NUM_PART_IDXS_IN_CTU_WIDTH ] = { 0, };
 UInt g_auiRasterToPelX  [ MAX_NUM_PART_IDXS_IN_CTU_WIDTH*MAX_NUM_PART_IDXS_IN_CTU_WIDTH ] = { 0, };

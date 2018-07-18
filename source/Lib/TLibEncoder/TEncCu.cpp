@@ -643,6 +643,8 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
           // 2Nx2N, NxN
 		  // 不为8*8
 		  // 深度约束，PU约束
+		  
+		  // 不为8*8块
           if(!( (rpcBestCU->getWidth(0)==8) && (rpcBestCU->getHeight(0)==8) ))
           {
             if( uiDepth == sps.getLog2DiffMaxMinCodingBlockSize() && doNotBlockPu)
@@ -1193,15 +1195,19 @@ Void TEncCu::xEncodeCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
   /// 判断边界与非边界
   if( ( uiRPelX < sps.getPicWidthInLumaSamples() ) && ( uiBPelY < sps.getPicHeightInLumaSamples() ) )
   {
+	  ////////////////////////////////////////
+	  ////////////////////////////////////////
+	  //编码分割信息
     m_pcEntropyCoder->encodeSplitFlag( pcCU, uiAbsPartIdx, uiDepth );
   }
   else
   {
     bBoundary = true;
   }
-
+  //// 当前存在继续分割的可能(未到 当前图片的/设置最大深度)，未到边界
   if( ( ( uiDepth < pcCU->getDepth( uiAbsPartIdx ) ) && ( uiDepth < sps.getLog2DiffMaxMinCodingBlockSize() ) ) || bBoundary )
   {
+	////////// uiQNumParts，当前一个子CU包含多少个基础4*4CU/PU
     UInt uiQNumParts = ( pcPic->getNumPartitionsInCtu() >> (uiDepth<<1) )>>2;
     if( uiDepth == pps.getMaxCuDQPDepth() && pps.getUseDQP())
     {
@@ -1217,11 +1223,15 @@ Void TEncCu::xEncodeCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
 	////////////////反复调用
     for ( UInt uiPartUnitIdx = 0; uiPartUnitIdx < 4; uiPartUnitIdx++, uiAbsPartIdx+=uiQNumParts )
     {
+	  //////// 更新起始x，y坐标
       uiLPelX   = pcCU->getCUPelX() + g_auiRasterToPelX[ g_auiZscanToRaster[uiAbsPartIdx] ];
       uiTPelY   = pcCU->getCUPelY() + g_auiRasterToPelY[ g_auiZscanToRaster[uiAbsPartIdx] ];
       if( ( uiLPelX < sps.getPicWidthInLumaSamples() ) && ( uiTPelY < sps.getPicHeightInLumaSamples() ) )
       {
-        xEncodeCU( pcCU, uiAbsPartIdx, uiDepth+1 );
+
+		  
+		  xEncodeCU( pcCU, uiAbsPartIdx, uiDepth+1 );
+		
       }
     }
     return;
@@ -1258,6 +1268,30 @@ Void TEncCu::xEncodeCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
   // 预测模式与PU类型
   m_pcEntropyCoder->encodePredMode( pcCU, uiAbsPartIdx );
   m_pcEntropyCoder->encodePartSize( pcCU, uiAbsPartIdx, uiDepth );
+
+
+
+
+  ///////////////////////////////////////////////////////////////
+  if (pcCU->getPic()->getPOC() == 1 && pcCU->getCtuRsAddr() == 1)
+  {
+	  TComMv mv1 = pcCU->getCUMvField(REF_PIC_LIST_0)->getMv(uiAbsPartIdx-1);
+	  TComMv mv4 = pcCU->getCUMvField(REF_PIC_LIST_0)->getMv(uiAbsPartIdx);
+	  uiLPelX = pcCU->getCUPelX() + g_auiRasterToPelX[g_auiZscanToRaster[uiAbsPartIdx]];
+	  uiTPelY = pcCU->getCUPelY() + g_auiRasterToPelY[g_auiZscanToRaster[uiAbsPartIdx]];
+	  UInt d = pcCU->getDepth(212);
+	  UInt h = pcCU->getHeight(212);
+	  UInt w = pcCU->getWidth(212);
+	  //TComCUMvField mv3;
+	  TComMv mv2 = pcCU->getCUMvField(REF_PIC_LIST_1)->getMv(0);
+	  //pCtu->getMvField(pCtu, 212, REF_PIC_LIST_0, mv3);
+  }
+
+  ///////////////////////////////////////////////////////////////
+
+
+
+
 
   if (pcCU->isIntra( uiAbsPartIdx ) && pcCU->getPartitionSize( uiAbsPartIdx ) == SIZE_2Nx2N )
   {

@@ -921,9 +921,9 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
     // encode CTU and calculate the true bit counters.
 	////////////////////////////////////////////////
 	////////////////////////////////////////////////
-
+	
     m_pcCuEncoder->encodeCtu( pCtu );
-	Int partnum = pCtu->getNumPartitions();
+	
 
 
 	//if(pCtu->getCtuRsAddr()==):
@@ -932,10 +932,33 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
 	//TComMv HorMV2 = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(2);
 	//TComMv HorMV3 = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(3);
 
+	//UChar w = pCtu->getDepth(1624);
+	//int w = sizeof(pCtu->getPartitionSize());
+	UChar w1 = pCtu->getPartitionSize(0);
+	UChar w2 = pCtu->getPartitionSize(1);
+	UChar w3 = pCtu->getPartitionSize(2);
+	UChar w4 = pCtu->getPartitionSize(3);
+	UChar w5 = pCtu->getPartitionSize(4);
+	UChar w6 = pCtu->getPartitionSize(5);
+	UChar w7 = pCtu->getPartitionSize(6);
+	UChar w8 = pCtu->getPartitionSize(7);
+	UChar w9 = pCtu->getPartitionSize(10);
 	UInt num_idx = pCtu->getZorderIdxInCtu();
 	Int CUX = pCtu->getCUPelX();
 	Int CUY = pCtu->getCUPelY();
-
+	if(pCtu->getPic()->getPOC()==1 && pCtu->getCtuRsAddr()==0)
+	{
+		TComMv mv1 = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(256);
+		TComMv mv4 = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(112);
+		
+		UInt d = pCtu->getDepth(112);
+		UInt h = pCtu->getHeight(112);
+		UInt w = pCtu->getWidth(112);
+		//TComCUMvField mv3;
+		TComMv mv2 = pCtu->getCUMvField(REF_PIC_LIST_1)->getMv(0);
+		//pCtu->getMvField(pCtu, 212, REF_PIC_LIST_0, mv3);
+	}
+	//////////////////////
     pRDSbacCoder->setBinCountingEnableFlag( false );
 
     const Int numberOfWrittenBits = m_pcEntropyCoder->getNumberOfWrittenBits();

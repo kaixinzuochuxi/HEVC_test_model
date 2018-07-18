@@ -11,6 +11,8 @@ private:
 	cv::Mat m_ImgRgb;
 	cv::Mat m_ImgSalSpatial;
 	cv::Mat m_ImgSalTemporal;
+	cv::Mat m_ImgSalTemporalHor;
+	cv::Mat m_ImgSalTemporalVer;
 	cv::Mat m_ImgSalAll;
 	
 public:
