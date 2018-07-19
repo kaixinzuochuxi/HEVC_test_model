@@ -43,7 +43,7 @@
 #include "TComRom.h"
 #include "TComChromaFormat.h"
 #include "SEI.h"
-
+#include <opencv2/core.hpp>
 //! \ingroup TLibCommon
 //! \{
 
@@ -168,6 +168,10 @@ public:
 
   // Set border extension flag
   Void          setBorderExtension(Bool b) { m_bIsBorderExtended = b; }
+
+
+  // 额外添加,注意保存为RGB不为BGR
+  void convert2opencvimg(cv::Mat &img);
 };// END CLASS DEFINITION TComPicYuv
 
 
@@ -177,5 +181,9 @@ UInt calcCRC     (const TComPicYuv& pic, TComPictureHash &digest, const BitDepth
 UInt calcMD5     (const TComPicYuv& pic, TComPictureHash &digest, const BitDepths &bitDepths);
 std::string hashToString(const TComPictureHash &digest, Int numChar);
 //! \}
+
+
+
+
 
 #endif // __TCOMPICYUV__

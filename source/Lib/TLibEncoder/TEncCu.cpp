@@ -1237,6 +1237,36 @@ Void TEncCu::xEncodeCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
     return;
   }
 
+
+
+
+
+
+
+
+  ///////////////////////////////////////////////////////////////
+  /*
+  if (pcCU->getPic()->getPOC() == 1 && pcCU->getCtuRsAddr() == 1)
+  {
+	  TComMv mv1 = pcCU->getCUMvField(REF_PIC_LIST_0)->getMv(uiAbsPartIdx - 1);
+	  TComMv mv4 = pcCU->getCUMvField(REF_PIC_LIST_0)->getMv(uiAbsPartIdx);
+	  uiLPelX = pcCU->getCUPelX() + g_auiRasterToPelX[g_auiZscanToRaster[uiAbsPartIdx]];
+	  uiTPelY = pcCU->getCUPelY() + g_auiRasterToPelY[g_auiZscanToRaster[uiAbsPartIdx]];
+	  UInt d = pcCU->getDepth(212);
+	  UInt h = pcCU->getHeight(212);
+	  UInt w = pcCU->getWidth(212);
+	  //TComCUMvField mv3;
+	  TComMv mv2 = pcCU->getCUMvField(REF_PIC_LIST_1)->getMv(0);
+	  //pCtu->getMvField(pCtu, 212, REF_PIC_LIST_0, mv3);
+  }
+  */
+  ///////////////////////////////////////////////////////////////
+
+
+
+
+
+
   if( uiDepth <= pps.getMaxCuDQPDepth() && pps.getUseDQP())
   {
     setdQPFlag(true);
@@ -1272,22 +1302,7 @@ Void TEncCu::xEncodeCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
 
 
 
-  ///////////////////////////////////////////////////////////////
-  if (pcCU->getPic()->getPOC() == 1 && pcCU->getCtuRsAddr() == 1)
-  {
-	  TComMv mv1 = pcCU->getCUMvField(REF_PIC_LIST_0)->getMv(uiAbsPartIdx-1);
-	  TComMv mv4 = pcCU->getCUMvField(REF_PIC_LIST_0)->getMv(uiAbsPartIdx);
-	  uiLPelX = pcCU->getCUPelX() + g_auiRasterToPelX[g_auiZscanToRaster[uiAbsPartIdx]];
-	  uiTPelY = pcCU->getCUPelY() + g_auiRasterToPelY[g_auiZscanToRaster[uiAbsPartIdx]];
-	  UInt d = pcCU->getDepth(212);
-	  UInt h = pcCU->getHeight(212);
-	  UInt w = pcCU->getWidth(212);
-	  //TComCUMvField mv3;
-	  TComMv mv2 = pcCU->getCUMvField(REF_PIC_LIST_1)->getMv(0);
-	  //pCtu->getMvField(pCtu, 212, REF_PIC_LIST_0, mv3);
-  }
 
-  ///////////////////////////////////////////////////////////////
 
 
 

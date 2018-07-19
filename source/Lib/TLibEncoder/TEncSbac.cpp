@@ -618,7 +618,7 @@ Void TEncSbac::codeSplitFlag   ( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDep
   }
 
   UInt uiCtx           = pcCU->getCtxSplitFlag( uiAbsPartIdx, uiDepth );
-  //////////
+  //////////ÊÇ·ñ»®·Ö
   UInt uiCurrSplitFlag = ( pcCU->getDepth( uiAbsPartIdx ) > uiDepth ) ? 1 : 0;
 
   assert( uiCtx < 3 );

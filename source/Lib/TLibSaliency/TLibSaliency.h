@@ -2,8 +2,8 @@
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
-
-
+#include "TLibCommon/TComDataCU.h"
+#include "TLibCommon/TComMv.h"
 
 class TComSaliency
 {
@@ -26,7 +26,7 @@ public:
 	
 	// …Ë÷√
 	//void setRGB(cv::Mat img) { m_ImgRgb = img; }
-	void settemporal(cv::Mat img) { m_ImgSalTemporal = img; }
+	void settemporal(TComDataCU * pcCu);
 	void setspatial(cv::Mat img) { m_ImgSalSpatial = img; }
 	void generateSpatialSaliency();
 	void generateAllSaliency();

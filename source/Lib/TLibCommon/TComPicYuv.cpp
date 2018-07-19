@@ -47,6 +47,9 @@
 
 #include "TComPicYuv.h"
 #include "TLibVideoIO/TVideoIOYuv.h"
+#include <opencv2/core.hpp>
+
+
 
 //! \ingroup TLibCommon
 //! \{
@@ -282,6 +285,8 @@ Void TComPicYuv::dump (const std::string &fileName, const BitDepths &bitDepths, 
 {
   FILE *pFile = fopen (fileName.c_str(), bAppend?"ab":"wb");
 
+
+  ///// 判断bits
   Bool is16bit=false;
   for(Int comp = 0; comp < getNumberValidComponents() && !bForceTo8Bit; comp++)
   {
@@ -333,3 +338,14 @@ Void TComPicYuv::dump (const std::string &fileName, const BitDepths &bitDepths, 
 }
 
 //! \}
+
+/*
+额外：生成opencv 的 image
+头文件添加：opencv
+
+*/
+
+Void TComPicYuv::convert2opencvimg(cv::Mat &img)
+{
+
+}

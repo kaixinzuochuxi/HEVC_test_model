@@ -489,7 +489,7 @@ public:
   Distortion&   getTotalDistortion            ( )                                                          { return m_uiTotalDistortion; }
   UInt&         getTotalBits                  ( )                                                          { return m_uiTotalBits;       }
   UInt&         getTotalNumPart               ( )                                                          { return m_uiNumPartition;    }
-
+  Int&			getMinSize()																				{ return m_unitSize; };
   UInt          getCoefScanIdx                ( const UInt uiAbsPartIdx, const UInt uiWidth, const UInt uiHeight, const ComponentID compID ) const ;
 
 };

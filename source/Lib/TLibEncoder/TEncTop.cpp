@@ -45,6 +45,7 @@
 #endif
 #include "self_define\ReadYuv.h"
 #include "self_define\ReadYuv.cpp"
+#include "TLibSaliency/TLibSaliency.h"
 #if USEOPENCV
 #include <opencv2\core.hpp>
 #include <opencv2\highgui.hpp>

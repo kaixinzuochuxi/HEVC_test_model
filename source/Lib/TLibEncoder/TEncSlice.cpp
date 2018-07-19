@@ -38,7 +38,7 @@
 #include "TEncTop.h"
 #include "TEncSlice.h"
 #include <math.h>
-
+#include "TLibSaliency/TLibSaliency.h"
 //! \ingroup TLibEncoder
 //! \{
 
@@ -925,7 +925,7 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
     m_pcCuEncoder->encodeCtu( pCtu );
 	
 
-
+	/*
 	//if(pCtu->getCtuRsAddr()==):
 	//TComMv HorMV0 = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(0);
 	//TComMv HorMV1 = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(1);
@@ -946,19 +946,24 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
 	UInt num_idx = pCtu->getZorderIdxInCtu();
 	Int CUX = pCtu->getCUPelX();
 	Int CUY = pCtu->getCUPelY();
-	if(pCtu->getPic()->getPOC()==1 && pCtu->getCtuRsAddr()==0)
+	if(pCtu->getPic()->getPOC()==1 && pCtu->getCtuRsAddr()==1)
 	{
 		TComMv mv1 = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(256);
-		TComMv mv4 = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(112);
+		TComMv mv4 = pCtu->getCUMvField(REF_PIC_LIST_0)->getMv(192);
 		
-		UInt d = pCtu->getDepth(112);
-		UInt h = pCtu->getHeight(112);
-		UInt w = pCtu->getWidth(112);
+		UInt d = pCtu->getDepth(192);
+		UInt h = pCtu->getHeight(192);
+		UInt w = pCtu->getWidth(192);
 		//TComCUMvField mv3;
 		TComMv mv2 = pCtu->getCUMvField(REF_PIC_LIST_1)->getMv(0);
 		//pCtu->getMvField(pCtu, 212, REF_PIC_LIST_0, mv3);
 	}
 	//////////////////////
+	*/
+
+
+
+
     pRDSbacCoder->setBinCountingEnableFlag( false );
 
     const Int numberOfWrittenBits = m_pcEntropyCoder->getNumberOfWrittenBits();
@@ -993,6 +998,10 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
     {
       m_entropyCodingSyncContextState.loadContexts(m_pppcRDSbacCoder[0][CI_CURR_BEST]);
     }
+
+
+
+
 
 	////////// RC
     if ( m_pcCfg->getUseRateCtrl() )
