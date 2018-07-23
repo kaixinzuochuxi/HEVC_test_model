@@ -48,8 +48,8 @@
 #include "TComPicYuv.h"
 #include "TLibVideoIO/TVideoIOYuv.h"
 #include <opencv2/core.hpp>
-
-
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
 
 //! \ingroup TLibCommon
 //! \{
@@ -342,10 +342,60 @@ Void TComPicYuv::dump (const std::string &fileName, const BitDepths &bitDepths, 
 /*
 额外：生成opencv 的 image
 头文件添加：opencv
-
+仅限8bits
 */
 
 Void TComPicYuv::convert2opencvimg(cv::Mat &img)
-{
+{	
 
+	/////// 定义新的存储空间
+	Int comp = 0;
+	const ComponentID  compId = ComponentID(comp);
+	const Pel         *pi = getAddr(compId);
+	const Int          stride = getStride(compId);
+	const Int          h = getHeight(compId);
+	const Int          w = getWidth(compId);
+
+
+	int bufLen = w * h * 3 / 2;
+	//int bufLen = w*h;
+	UChar* pYuvBuf = new UChar[bufLen];
+	UChar *temp = pYuvBuf;
+	
+	for (Int comp = 0; comp < getNumberValidComponents(); comp++)
+	{
+		const ComponentID  compId = ComponentID(comp);
+		const Pel         *pi = getAddr(compId);
+		const Int          stride = getStride(compId);
+		const Int          height = getHeight(compId);
+		const Int          width = getWidth(compId);
+
+		
+		//// toChannelType判断channeltype，luma？chorma？
+		//const Int shift = bitDepths.recon[toChannelType(compId)] - 8;
+		//const Int offset = (shift>0) ? (1 << (shift - 1)) : 0;
+		const Int shift = 0;
+		const Int offset = 0;
+		for (Int y = 0; y < height; y++)
+		{
+			for (Int x = 0; x < width; x++)
+			{
+				*(temp++) = (UChar)Clip3<Pel>(0, 255, (pi[x] + offset) >> shift);
+			}
+			pi += stride;
+		}
+		
+	}
+	/////////////以下包含测试部分，忽略注释
+	cv::Mat yuvImg;
+	yuvImg.create(h * 3 / 2, w, CV_8UC1);
+	//yuvImg.create(h , w, CV_8UC3);
+	//////memcpy!!!
+	memcpy(yuvImg.data, pYuvBuf, bufLen * sizeof(UChar));
+	//cv::Mat rgbImg(h, w, CV_8UC3);
+	//yuvImg.convertTo(rgbImg, CV_YUV2RGB_YV12,1/255.0);
+	cv::cvtColor(yuvImg, img, CV_YUV2RGB_YV12, 3);
+	//cv::imshow("img", img);
+	//cv::waitKey(1);
 }
+

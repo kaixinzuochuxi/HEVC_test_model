@@ -38,7 +38,7 @@
 #include "TEncTop.h"
 #include "TEncSlice.h"
 #include <math.h>
-#include "TLibSaliency/TLibSaliency.h"
+#include "TLibContrib/TComSaliency.h"
 //! \ingroup TLibEncoder
 //! \{
 

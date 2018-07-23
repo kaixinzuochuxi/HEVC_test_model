@@ -1,4 +1,6 @@
 
+#ifndef __TCOMSALIENCY__
+#define __TCOMSALIENCY__
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
@@ -16,6 +18,7 @@ private:
 	cv::Mat m_ImgSalAll;
 	
 public:
+	//TComSaliency();
 	TComSaliency(cv::Mat img);
 	//virtual ~TComSaliency();
 	// ทรฮส
@@ -32,3 +35,4 @@ public:
 	void generateAllSaliency();
 };
 
+#endif // __TCOMSALIENCY__

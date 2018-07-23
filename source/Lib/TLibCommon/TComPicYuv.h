@@ -170,7 +170,7 @@ public:
   Void          setBorderExtension(Bool b) { m_bIsBorderExtended = b; }
 
 
-  // 额外添加,注意保存为RGB不为BGR
+  // 额外添加,注意转换为RGB不为BGR
   void convert2opencvimg(cv::Mat &img);
 };// END CLASS DEFINITION TComPicYuv
 

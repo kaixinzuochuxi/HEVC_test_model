@@ -40,10 +40,10 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -74,6 +74,10 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>C:\ProgramData\opencv\build\include;C:\ProgramData\opencv\build\include\opencv;C:\ProgramData\opencv\build\include\opencv2;$(IncludePath)</IncludePath>
     <LibraryPath>C:\ProgramData\opencv\build\x64\vc14\lib;$(LibraryPath)</LibraryPath>
+    <TargetExt>.lib</TargetExt>
+    <OutDir>$(SolutionDir)\vc2015\$(Platform)\$(Configuration)\$(RootNamespace)\</OutDir>
+    <IntDir>$(SolutionDir)\vc2015\$(Platform)\$(Configuration)\$(RootNamespace)\</IntDir>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -89,10 +93,11 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>
+      </SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\source\Lib\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(SolutionDir)\..\source\Lib\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -154,10 +159,10 @@
     <Image Include="..\..\..\..\temporal saliency\pic\BasketballDrill_832x480_50\0.png" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\source\Lib\TLibSaliency\TLibSaliency.h" />
+    <ClInclude Include="..\..\source\Lib\TLibSaliency\TComSaliency.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\source\Lib\TLibSaliency\TLibSaliency.cpp" />
+    <ClCompile Include="..\..\source\Lib\TLibSaliency\TComSaliency.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

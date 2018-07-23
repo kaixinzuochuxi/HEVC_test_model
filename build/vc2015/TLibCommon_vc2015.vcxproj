@@ -181,6 +181,7 @@
     <ClCompile Include="..\..\source\Lib\TLibCommon\TComTU.cpp" />
     <ClCompile Include="..\..\source\Lib\TLibCommon\TComWeightPrediction.cpp" />
     <ClCompile Include="..\..\source\Lib\TLibCommon\TComYuv.cpp" />
+    <ClCompile Include="..\..\source\Lib\TLibContrib\TComSaliency.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Lib\libmd5\libmd5.h" />
@@ -220,6 +221,7 @@
     <ClInclude Include="..\..\source\Lib\TLibCommon\TComWeightPrediction.h" />
     <ClInclude Include="..\..\source\Lib\TLibCommon\TComYuv.h" />
     <ClInclude Include="..\..\source\Lib\TLibCommon\TypeDef.h" />
+    <ClInclude Include="..\..\source\Lib\TLibContrib\TComSaliency.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

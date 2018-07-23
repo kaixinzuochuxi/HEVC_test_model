@@ -20,12 +20,12 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\source\Lib\TLibSaliency\TLibSaliency.h">
+    <ClInclude Include="..\..\source\Lib\TLibSaliency\TComSaliency.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\source\Lib\TLibSaliency\TLibSaliency.cpp">
+    <ClCompile Include="..\..\source\Lib\TLibSaliency\TComSaliency.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

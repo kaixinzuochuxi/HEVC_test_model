@@ -43,17 +43,19 @@
 #if FAST_BIT_EST
 #include "TLibCommon/ContextModel.h"
 #endif
-#include "self_define\ReadYuv.h"
-#include "self_define\ReadYuv.cpp"
-#include "TLibSaliency/TLibSaliency.h"
-#if USEOPENCV
+//#include "self_define\ReadYuv.h"
+//#include "self_define\ReadYuv.cpp"
+
+#include "TLibContrib/TComSaliency.h"
+
 #include <opencv2\core.hpp>
 #include <opencv2\highgui.hpp>
 #include <opencv2\imgproc.hpp>
-#include "self_define\ReadYuv.cpp"
-#include "test_opencv\test_opencv\IKN.h"
+//#include "self_define\ReadYuv.cpp"
+//#include "test_opencv\test_opencv\IKN.h"
 #include <opencv2\imgcodecs.hpp>
-#endif
+
+
 //! \ingroup TLibEncoder
 //! \{
 
@@ -366,13 +368,18 @@ Void TEncTop::encode( Bool flush, TComPicYuv* pcPicYuvOrg, TComPicYuv* pcPicYuvT
 	////////////////////////////////////////////////
 	// compute image characteristics
     // compute image characteristics
+	cv::Mat img;
+	pcPicYuvOrg->convert2opencvimg(img);
+	TComSaliency test(img);
+	test.generateSpatialSaliency();
+	//cv::namedWindow("saliency", cv::WINDOW_AUTOSIZE);
+	//cv::imshow("saliency", test.getSpatialSalencyMap());
+	//cv::waitKey();
 
 
 
 
-
-
-    if ( getUseAdaptiveQP() )
+	if ( getUseAdaptiveQP() )
     {
       m_cPreanalyzer.xPreanalyze( dynamic_cast<TEncPic*>( pcPicCurr ) );
     }
