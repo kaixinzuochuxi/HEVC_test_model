@@ -1087,6 +1087,9 @@ printHash(const HashType hashType, const std::string &digestStr)
 // ====================================================================================================================
 // Public member functions
 // ====================================================================================================================
+
+
+
 Void TEncGOP::compressGOP( Int iPOCLast, Int iNumPicRcvd, TComList<TComPic*>& rcListPic,
                            TComList<TComPicYuv*>& rcListPicYuvRecOut, std::list<AccessUnit>& accessUnitsInGOP,
 #if JVET_F0064_MSSSIM            
@@ -1146,6 +1149,7 @@ Void TEncGOP::compressGOP( Int iPOCLast, Int iNumPicRcvd, TComList<TComPic*>& rc
     Int iTimeOffset;
     Int pocCurr;
 	///////按条件初始化
+	///////不考虑field，设置当前帧编号pocCurr，iTimeOffset。依据：GOP第一帧？
     if(iPOCLast == 0) //case first frame or first top field
     {
       pocCurr=0;
@@ -1828,9 +1832,12 @@ Void TEncGOP::compressGOP( Int iPOCLast, Int iNumPicRcvd, TComList<TComPic*>& rc
       trailingSeiMessages.push_back(decodedPictureHashSei);
     }
 
+
+	/////// 设置编码完成标志
     m_pcCfg->setEncodedFlag(iGOPid, true);
 
     Double PSNR_Y;
+	/////// 参数：gopid，pic，帧的accessunit
 #if JVET_F0064_MSSSIM
     xCalculateAddPSNRs( isField, isTff, iGOPid, pcPic, accessUnit, rcListPic, dEncTime, snr_conversion, printFrameMSE, printMSSSIM, &PSNR_Y );
 #else
@@ -1849,6 +1856,8 @@ Void TEncGOP::compressGOP( Int iPOCLast, Int iNumPicRcvd, TComList<TComPic*>& rc
     
     printHash(m_pcCfg->getDecodedPictureHashSEIType(), digestStr);
 
+
+	/////////更新RC信息
     if ( m_pcCfg->getUseRateCtrl() )
     {
       Double avgQP     = m_pcRateCtrl->getRCPic()->calAverageQP();
@@ -2103,6 +2112,10 @@ UInt64 TEncGOP::xFindDistortionFrame (TComPicYuv* pcPic0, TComPicYuv* pcPic1, co
 
   return uiTotalDiff;
 }
+
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+//计算PSNR
 #if JVET_F0064_MSSSIM
 Void TEncGOP::xCalculateAddPSNRs( const Bool isField, const Bool isFieldTopFieldFirst, const Int iGOPid, TComPic* pcPic, const AccessUnit&accessUnit, TComList<TComPic*> &rcListPic, const Double dEncTime, const InputColourSpaceConversion snr_conversion, const Bool printFrameMSE, const Bool printMSSSIM, Double* PSNR_Y )
 {
@@ -2184,12 +2197,15 @@ Void TEncGOP::xCalculateAddPSNRs( const Bool isField, const Bool isFieldTopField
   }
 }
 
+
+//////pcPicD,rec
 #if JVET_F0064_MSSSIM
 Void TEncGOP::xCalculateAddPSNR( TComPic* pcPic, TComPicYuv* pcPicD, const AccessUnit& accessUnit, Double dEncTime, const InputColourSpaceConversion conversion, const Bool printFrameMSE, const Bool printMSSSIM, Double* PSNR_Y )
 #else
 Void TEncGOP::xCalculateAddPSNR( TComPic* pcPic, TComPicYuv* pcPicD, const AccessUnit& accessUnit, Double dEncTime, const InputColourSpaceConversion conversion, const Bool printFrameMSE, Double* PSNR_Y )
 #endif
 {
+  ////// 定义数组，初始化
   Double  dPSNR[MAX_NUM_COMPONENT];
 
   for(Int i=0; i<MAX_NUM_COMPONENT; i++)
@@ -2208,7 +2224,7 @@ Void TEncGOP::xCalculateAddPSNR( TComPic* pcPic, TComPicYuv* pcPicD, const Acces
   //===== calculate PSNR =====
   Double MSEyuvframe[MAX_NUM_COMPONENT] = {0, 0, 0};
 
-  for(Int chan=0; chan<pcPicD->getNumberValidComponents(); chan++)
+  for(Int chan=0; chan< pcPicD->getNumberValidComponents(); chan++)
   {
     const ComponentID ch=ComponentID(chan);
     const TComPicYuv *pOrgPicYuv =(conversion!=IPCOLOURSPACE_UNCHANGED) ? pcPic ->getPicYuvTrueOrg() : pcPic ->getPicYuvOrg();
@@ -2302,6 +2318,9 @@ Void TEncGOP::xCalculateAddPSNR( TComPic* pcPic, TComPicYuv* pcPicD, const Acces
   m_ext360.addResult(m_gcAnalyzeAll);
 #endif
 
+
+
+  //////////// 帧的类型,不同的analyze
   TComSlice*  pcSlice = pcPic->getSlice(0);
   if (pcSlice->isIntra())
   {
@@ -2315,6 +2334,7 @@ Void TEncGOP::xCalculateAddPSNR( TComPic* pcPic, TComPicYuv* pcPicD, const Acces
 #endif
     *PSNR_Y = dPSNR[COMPONENT_Y];
   }
+  ////////
   if (pcSlice->isInterP())
   {
 #if JVET_F0064_MSSSIM
@@ -2327,6 +2347,7 @@ Void TEncGOP::xCalculateAddPSNR( TComPic* pcPic, TComPicYuv* pcPicD, const Acces
 #endif
     *PSNR_Y = dPSNR[COMPONENT_Y];
   }
+  /////////////////////////////
   if (pcSlice->isInterB())
   {
 #if JVET_F0064_MSSSIM
@@ -2340,6 +2361,8 @@ Void TEncGOP::xCalculateAddPSNR( TComPic* pcPic, TComPicYuv* pcPicD, const Acces
     *PSNR_Y = dPSNR[COMPONENT_Y];
   }
 
+
+  //////// 是否被参考
   TChar c = (pcSlice->isIntra() ? 'I' : pcSlice->isInterP() ? 'P' : 'B');
   if (!pcSlice->isReferenced())
   {
@@ -2380,7 +2403,7 @@ Void TEncGOP::xCalculateAddPSNR( TComPic* pcPic, TComPicYuv* pcPicD, const Acces
   printf(" [ET %5.0f ]", dEncTime );
 
   // printf(" [WP %d]", pcSlice->getUseWeightedPrediction());
-
+  ///////// 参考帧情况
   for (Int iRefList = 0; iRefList < 2; iRefList++)
   {
     printf(" [L%d ", iRefList);

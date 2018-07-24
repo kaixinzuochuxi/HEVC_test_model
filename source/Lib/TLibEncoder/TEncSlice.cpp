@@ -1079,6 +1079,7 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
 
 
   tsal.normalizetemporal();
+  tsal.generateAllSaliency();
   //int tttttt=1;
   //cv::namedWindow("saliency", cv::WINDOW_AUTOSIZE);
   //cv::imshow("saliency", tsal.getTemporalSalencyMap());
