@@ -45,6 +45,7 @@
 
 #include "../TLibCommon/CommonDef.h"
 #include "../TLibCommon/TComDataCU.h"
+#include "TLibContrib/TComSaliency.h"
 
 #include <vector>
 #include <algorithm>
@@ -57,6 +58,9 @@ using namespace std;
 #include "../TLibEncoder/TEncCfg.h"
 #include <list>
 #include <cassert>
+
+//extern TComSaliency tsal;
+
 
 const Int g_RCInvalidQPValue = -999;
 const Int g_RCSmoothWindowSize = 40;

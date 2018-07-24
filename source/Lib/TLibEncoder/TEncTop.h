@@ -58,7 +58,7 @@
 #include "TEncPreanalyzer.h"
 #include "TEncRateCtrl.h"
 
-//#include "TLibSaliency/TLibSaliency.h"
+#include "../TLibContrib/TComSaliency.h"
 
 
 

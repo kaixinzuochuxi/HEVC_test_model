@@ -368,12 +368,16 @@ Void TEncTop::encode( Bool flush, TComPicYuv* pcPicYuvOrg, TComPicYuv* pcPicYuvT
 	////////////////////////////////////////////////
 	// compute image characteristics
     // compute image characteristics
-	cv::Mat img;
-	pcPicYuvOrg->convert2opencvimg(img);
-	TComSaliency test(img);
-	test.generateSpatialSaliency();
+
+
+	//cv::Mat img;
+	//pcPicYuvOrg->convert2opencvimg(img);
+	
+	//extern TComSaliency tsal;
+	//tsal.setRGB(img);
+	//tsal.generateSpatialSaliency();
 	//cv::namedWindow("saliency", cv::WINDOW_AUTOSIZE);
-	//cv::imshow("saliency", test.getSpatialSalencyMap());
+	//cv::imshow("saliency", tsal.getSpatialSalencyMap());
 	//cv::waitKey();
 
 

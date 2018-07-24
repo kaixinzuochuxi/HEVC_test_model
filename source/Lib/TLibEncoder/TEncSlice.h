@@ -46,7 +46,7 @@
 #include "TEncCu.h"
 #include "WeightPredAnalysis.h"
 #include "TEncRateCtrl.h"
-
+#include "../TLibContrib/TComSaliency.h"
 //! \ingroup TLibEncoder
 //! \{
 

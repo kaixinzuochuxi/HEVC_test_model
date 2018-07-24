@@ -39,6 +39,9 @@
 #include "TEncSlice.h"
 #include <math.h>
 #include "TLibContrib/TComSaliency.h"
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+
 //! \ingroup TLibEncoder
 //! \{
 
@@ -804,6 +807,22 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
     }
   }
 
+
+
+  cv::Mat img;
+  pcPic->getPicYuvOrg()->convert2opencvimg(img);
+
+  extern TComSaliency tsal;
+  tsal.setRGB(img);
+  tsal.generateSpatialSaliency();
+  //((float*) tsal.getSpatialSalencyMap().data)[416]=1;
+  //cv::namedWindow("saliency", cv::WINDOW_AUTOSIZE);
+  //cv::imshow("saliency", tsal.getSpatialSalencyMap());
+  //cv::waitKey();
+
+
+
+
   // for every CTU in the slice segment (may terminate sooner if there is a byte limit on the slice-segment)
 //////////////////////////////////////////////////////////////////
   for( UInt ctuTsAddr = startCtuTsAddr; ctuTsAddr < boundingCtuTsAddr; ++ctuTsAddr )
@@ -924,6 +943,14 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
 	
     m_pcCuEncoder->encodeCtu( pCtu );
 	
+	//extern TComSaliency tsal;
+	//if (pCtu->getSlice()->getPOC() == 1 && pCtu->getCtuRsAddr() == 6)
+	//{
+		tsal.settemporal(pCtu);
+	//}
+	//cv::namedWindow("saliency", cv::WINDOW_AUTOSIZE);
+	//cv::imshow("saliency", tsal.getSpatialSalencyMap());
+	//cv::waitKey();
 
 	/*
 	//if(pCtu->getCtuRsAddr()==):
@@ -1049,6 +1076,14 @@ Void TEncSlice::compressSlice( TComPic* pcPic, const Bool bCompressEntireSlice, 
   // stop use of temporary bit counter object.
   m_pppcRDSbacCoder[0][CI_CURR_BEST]->setBitstream(NULL);
   m_pcRDGoOnSbacCoder->setBitstream(NULL); // stop use of tempBitCounter.
+
+
+  tsal.normalizetemporal();
+  //int tttttt=1;
+  //cv::namedWindow("saliency", cv::WINDOW_AUTOSIZE);
+  //cv::imshow("saliency", tsal.getTemporalSalencyMap());
+  //cv::waitKey();
+
 
   // TODO: optimise cabac_init during compress slice to improve multi-slice operation
   //if (pcSlice->getPPS()->getCabacInitPresentFlag() && !pcSlice->getPPS()->getDependentSliceSegmentsEnabledFlag())

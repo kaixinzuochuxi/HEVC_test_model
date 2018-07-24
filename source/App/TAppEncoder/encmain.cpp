@@ -44,6 +44,7 @@
 //! \{
 
 #include "../Lib/TLibCommon/Debug.h"
+#include "TLibContrib/TComSaliency.h"
 
 // ====================================================================================================================
 // Main function
@@ -89,7 +90,7 @@ int main(int argc, char* argv[])
 #if ENVIRONMENT_VARIABLE_DEBUG_AND_TEST
   EnvVar::printEnvVarInUse();
 #endif
-
+  
   // starting time
   Double dResult;
   clock_t lBefore = clock();
