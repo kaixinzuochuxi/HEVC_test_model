@@ -2213,6 +2213,7 @@ Void TEncGOP::xCalculateAddPSNR( TComPic* pcPic, TComPicYuv* pcPicD, const Acces
     dPSNR[i]=0.0;
   }
 
+  /////// 是否变换颜色空间
   TComPicYuv cscd;
   if (conversion!=IPCOLOURSPACE_UNCHANGED)
   {
@@ -2228,10 +2229,14 @@ Void TEncGOP::xCalculateAddPSNR( TComPic* pcPic, TComPicYuv* pcPicD, const Acces
   {
     const ComponentID ch=ComponentID(chan);
     const TComPicYuv *pOrgPicYuv =(conversion!=IPCOLOURSPACE_UNCHANGED) ? pcPic ->getPicYuvTrueOrg() : pcPic ->getPicYuvOrg();
+	////// 开始位置，原始图片与重构图片，stride?????
     const Pel*  pOrg       = pOrgPicYuv->getAddr(ch);
     const Int   iOrgStride = pOrgPicYuv->getStride(ch);
+
+
     Pel*  pRec             = picd.getAddr(ch);
     const Int   iRecStride = picd.getStride(ch);
+	////// 图片宽高
     const Int   iWidth  = pcPicD->getWidth (ch) - (m_pcEncTop->getPad(0) >> pcPic->getComponentScaleX(ch));
     const Int   iHeight = pcPicD->getHeight(ch) - ((m_pcEncTop->getPad(1) >> (pcPic->isField()?1:0)) >> pcPic->getComponentScaleY(ch));
 
