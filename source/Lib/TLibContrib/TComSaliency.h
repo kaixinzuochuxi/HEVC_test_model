@@ -7,6 +7,8 @@
 #include "TLibCommon/TComDataCU.h"
 #include "TLibCommon/TComMv.h"
 
+
+
 class TComSaliency
 {
 private:
@@ -16,6 +18,8 @@ private:
 	cv::Mat m_ImgSalTemporalHor;
 	cv::Mat m_ImgSalTemporalVer;
 	cv::Mat m_ImgSalAll;
+	int m_counter;
+	void xinitfolder();
 	
 public:
 	TComSaliency();
@@ -38,6 +42,8 @@ public:
 	void generateSpatialSaliency();
 	void generateAllSaliency();
 
+	
+	void saveimg();
 };
 
 
