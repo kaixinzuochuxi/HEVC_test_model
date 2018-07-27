@@ -452,14 +452,12 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
   Bool    doNotBlockPu = true;
   Bool    earlyDetectionSkipMode = false;
 
-  ///////////////////坐标范围
   const UInt uiLPelX   = rpcBestCU->getCUPelX();
   const UInt uiRPelX   = uiLPelX + rpcBestCU->getWidth(0)  - 1;
   const UInt uiTPelY   = rpcBestCU->getCUPelY();
   const UInt uiBPelY   = uiTPelY + rpcBestCU->getHeight(0) - 1;
   const UInt uiWidth   = rpcBestCU->getWidth(0);
 
-  ////////////////////QP范围
   Int iBaseQP = xComputeQP( rpcBestCU, uiDepth );
   Int iMinQP;
   Int iMaxQP;
@@ -479,8 +477,6 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
     iMaxQP = rpcTempCU->getQP(0);
   }
 
-
-
   if ( m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled() )
   {
     if ( uiDepth <= pps.getMaxCuDQPDepth() )
@@ -492,8 +488,6 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
     iMaxQP = iMinQP; // force encode choose the modified QO
   }
 
-
-  /////////////////////////RC
   if ( m_pcEncCfg->getUseRateCtrl() )
   {
     iMinQP = m_pcRateCtrl->getRCQP();
@@ -515,9 +509,9 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
   }
 
   TComSlice * pcSlice = rpcTempCU->getPic()->getSlice(rpcTempCU->getPic()->getCurrSliceIdx());
-  ////////是否到达边界F未到T到达
+
   const Bool bBoundary = !( uiRPelX < sps.getPicWidthInLumaSamples() && uiBPelY < sps.getPicHeightInLumaSamples() );
-  /////////到达边界
+
   if ( !bBoundary )
   {
     for (Int iQP=iMinQP; iQP<=iMaxQP; iQP++)
@@ -801,8 +795,6 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, const 
       m_pcRDGoOnSbacCoder->store(m_pppcRDSbacCoder[uiDepth][CI_NEXT_BEST]);
     }
   }
-
-
 
   // copy original YUV samples to PCM buffer
   if( rpcBestCU->getTotalCost()!=MAX_DOUBLE && rpcBestCU->isLosslessCoded(0) && (rpcBestCU->getIPCMFlag(0) == false))
@@ -1109,7 +1101,7 @@ Void TEncCu::xEncodeCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
     {
       setCodeChromaQpAdjFlag(true);
     }
-	////////////////反复调用
+
     for ( UInt uiPartUnitIdx = 0; uiPartUnitIdx < 4; uiPartUnitIdx++, uiAbsPartIdx+=uiQNumParts )
     {
       uiLPelX   = pcCU->getCUPelX() + g_auiRasterToPelX[ g_auiZscanToRaster[uiAbsPartIdx] ];
@@ -1165,7 +1157,6 @@ Void TEncCu::xEncodeCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
   }
 
   // prediction Info ( Intra : direction mode, Inter : Mv, reference idx )
-  ///////////////////////////////
   m_pcEntropyCoder->encodePredInfo( pcCU, uiAbsPartIdx );
 
   // Encode Coefficients

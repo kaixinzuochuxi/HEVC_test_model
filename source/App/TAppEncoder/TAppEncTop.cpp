@@ -479,7 +479,6 @@ Void TAppEncTop::xInitLib(Bool isFieldCoding)
  */
 Void TAppEncTop::encode()
 {
-	//ÎÄ¼þÁ÷
   fstream bitstreamFile(m_bitstreamFileName.c_str(), fstream::binary | fstream::out);
   if (!bitstreamFile)
   {
@@ -494,7 +493,7 @@ Void TAppEncTop::encode()
   xInitLibCfg();
   xCreateLib();
   xInitLib(m_isField);
-  
+
   printChromaFormat();
 
   // main encoder loop

@@ -468,8 +468,6 @@ Void TEncEntropy::encodePUWise( TComDataCU* pcCU, UInt uiAbsPartIdx )
   for ( UInt uiPartIdx = 0, uiSubPartIdx = uiAbsPartIdx; uiPartIdx < uiNumPU; uiPartIdx++, uiSubPartIdx += uiPUOffset )
   {
     encodeMergeFlag( pcCU, uiSubPartIdx );
-
-	///////////////ºÏ²¢
     if ( pcCU->getMergeFlag( uiSubPartIdx ) )
     {
       encodeMergeIndex( pcCU, uiSubPartIdx );
@@ -484,14 +482,10 @@ Void TEncEntropy::encodePUWise( TComDataCU* pcCU, UInt uiAbsPartIdx )
     else
     {
       encodeInterDirPU( pcCU, uiSubPartIdx );
-	  //////////////////²Î¿¼Ö¡
       for ( UInt uiRefListIdx = 0; uiRefListIdx < 2; uiRefListIdx++ )
       {
         if ( pcCU->getSlice()->getNumRefIdx( RefPicList( uiRefListIdx ) ) > 0 )
         {
-			////////////////////////////////////////////////////////////////////
-			///////////////////////////////////////////////////////////////////
-			///////////////////////////////////////////////////////////////////
           encodeRefFrmIdxPU ( pcCU, uiSubPartIdx, RefPicList( uiRefListIdx ) );
           encodeMvdPU       ( pcCU, uiSubPartIdx, RefPicList( uiRefListIdx ) );
           encodeMVPIdxPU    ( pcCU, uiSubPartIdx, RefPicList( uiRefListIdx ) );
@@ -550,7 +544,6 @@ Void TEncEntropy::encodeMvdPU( TComDataCU* pcCU, UInt uiAbsPartIdx, RefPicList e
 
   if ( pcCU->getInterDir( uiAbsPartIdx ) & ( 1 << eRefList ) )
   {
-	  //////////////////////////////////////////////Sbac
     m_pcEntropyCoderIf->codeMvd( pcCU, uiAbsPartIdx, eRefList );
   }
   return;

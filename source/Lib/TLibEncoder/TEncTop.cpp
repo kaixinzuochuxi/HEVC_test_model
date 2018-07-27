@@ -39,20 +39,10 @@
 #include "TEncTop.h"
 #include "TEncPic.h"
 #include "TLibCommon/TComChromaFormat.h"
-#include <iostream>
 #if FAST_BIT_EST
 #include "TLibCommon/ContextModel.h"
 #endif
-#include "self_define\ReadYuv.h"
-#include "self_define\ReadYuv.cpp"
-#if USEOPENCV
-#include <opencv2\core.hpp>
-#include <opencv2\highgui.hpp>
-#include <opencv2\imgproc.hpp>
-#include "self_define\ReadYuv.cpp"
-#include "test_opencv\test_opencv\IKN.h"
-#include <opencv2\imgcodecs.hpp>
-#endif
+
 //! \ingroup TLibEncoder
 //! \{
 
@@ -352,25 +342,7 @@ Void TEncTop::encode( Bool flush, TComPicYuv* pcPicYuvOrg, TComPicYuv* pcPicYuvT
     pcPicYuvOrg->copyToPic( pcPicCurr->getPicYuvOrg() );
     pcPicYuvTrueOrg->copyToPic( pcPicCurr->getPicYuvTrueOrg() );
 
-	///测试：
-	//printf("%d", sizeof(pcPicYuvTrueOrg));
-	//cv::Mat temp = &(pcPicCurr->getPicYuvOrg())->getAddr(MAX_NUM_COMPONENT);
-	//Pel *temp = (pcPicCurr->getPicYuvOrg())->getAddr(MAX_NUM_COMPONENT);
-	//printf("%d", sizeof((pcPicCurr->getPicYuvOrg())->getAddr(MAX_NUM_COMPONENT)));
-	//BitDepths temp_test{8,8 };
-	//pcPicCurr->getPicYuvOrg()->dump("test.yuv", temp_test, 2, 1);
-	//BitDepths temp_test{ 8,8 };
-	//convertYUVtoRGB(pcPicCurr->getPicYuvOrg(), temp_test, 2, 1);
-	//DisplayYUV();
-	////////////////////////////////////////////////
-	// compute image characteristics
     // compute image characteristics
-
-
-
-
-
-
     if ( getUseAdaptiveQP() )
     {
       m_cPreanalyzer.xPreanalyze( dynamic_cast<TEncPic*>( pcPicCurr ) );
@@ -426,28 +398,7 @@ Void separateFields(Pel* org, Pel* dstField, UInt stride, UInt width, UInt heigh
   }
 
 }
-/*
-1. 得到原始YUV，
-1. 定义当前图像指针，ppsID，判断getWCGChromaQPControl()启用？
-2. 产生新图像buffer
-3. 复制2次
-4. 计算图片性质
-if ( getUseAdaptiveQP() )
-2. 退出条件：--已编码数量设为0退出
-未收到图片
-不刷新 & 不为第一帧 & GOP大小不为0 & 收到图片数量不等于GOP大小
-3. 是否rc？初始化
-4. 压缩GOP
-JVET_F0064_MSSSIM？
-是，最后面加 m_printMSSSIM
-m_cGOPEncoder.compressGOP(m_iPOCLast, m_iNumPicRcvd, m_cListPic, rcListPicYuvRecOut, accessUnitsOut, false, false, snrCSC, m_printFrameMSE);
-5. 销除rc。
-6. 变量设置
-已编码，已收到，总共已编码
-iNumEncoded         = m_iNumPicRcvd;
-m_iNumPicRcvd       = 0;
-m_uiNumAllPicCoded += iNumEncoded;
-*/
+
 Void TEncTop::encode(Bool flush, TComPicYuv* pcPicYuvOrg, TComPicYuv* pcPicYuvTrueOrg, const InputColourSpaceConversion snrCSC, TComList<TComPicYuv*>& rcListPicYuvRecOut, std::list<AccessUnit>& accessUnitsOut, Int& iNumEncoded, Bool isTff)
 {
   iNumEncoded = 0;

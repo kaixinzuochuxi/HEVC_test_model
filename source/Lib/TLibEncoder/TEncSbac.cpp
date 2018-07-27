@@ -782,10 +782,8 @@ Void TEncSbac::codeMvd( TComDataCU* pcCU, UInt uiAbsPartIdx, RefPicList eRefList
   {
     return;
   }
-  /////////////////////
 
   const TComCUMvField* pcCUMvField = pcCU->getCUMvField( eRefList );
-  ///////////////////////////////////
   const Int iHor = pcCUMvField->getMvd( uiAbsPartIdx ).getHor();
   const Int iVer = pcCUMvField->getMvd( uiAbsPartIdx ).getVer();
   ContextModel* pCtx = m_cCUMvdSCModel.get( 0 );

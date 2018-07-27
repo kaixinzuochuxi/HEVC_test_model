@@ -63,26 +63,19 @@ TEncPreanalyzer::~TEncPreanalyzer()
  */
 Void TEncPreanalyzer::xPreanalyze( TEncPic* pcEPic )
 {
-
-	//复制信息，宽高stride
   TComPicYuv* pcPicYuv = pcEPic->getPicYuvOrg();
   const Int iWidth = pcPicYuv->getWidth(COMPONENT_Y);
   const Int iHeight = pcPicYuv->getHeight(COMPONENT_Y);
   const Int iStride = pcPicYuv->getStride(COMPONENT_Y);
 
-
-  //getMaxAQDepth，遍历
   for ( UInt d = 0; d < pcEPic->getMaxAQDepth(); d++ )
   {
-	  //初始位置，按块划分，块的数组的初始地址
     const Pel* pLineY = pcPicYuv->getAddr(COMPONENT_Y);
     TEncPicQPAdaptationLayer* pcAQLayer = pcEPic->getAQLayer(d);
     const UInt uiAQPartWidth = pcAQLayer->getAQPartWidth();
     const UInt uiAQPartHeight = pcAQLayer->getAQPartHeight();
     TEncQPAdaptationUnit* pcAQU = pcAQLayer->getQPAdaptationUnit();
 
-
-	//对每个块操作，当前x,y位置
     Double dSumAct = 0.0;
     for ( UInt y = 0; y < iHeight; y += uiAQPartHeight )
     {
@@ -127,7 +120,6 @@ Void TEncPreanalyzer::xPreanalyze( TEncPic* pcEPic )
 
         assert ((uiCurrAQPartWidth&1)==0);
         assert ((uiCurrAQPartHeight&1)==0);
-		//象限
         const UInt pixelWidthOfQuadrants  = uiCurrAQPartWidth >>1;
         const UInt pixelHeightOfQuadrants = uiCurrAQPartHeight>>1;
         const UInt numPixInAQPart         = pixelWidthOfQuadrants * pixelHeightOfQuadrants;
